@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.feature_extraction import text
 import string
-import re
+from nltk.corpus import wordnet
 
 stop_words = text.ENGLISH_STOP_WORDS
 
@@ -47,7 +47,18 @@ def computeSentenceAverages(inputText):
                 try:
                     score = sentimentDict[word]
                 except KeyError:
-                    score = 4.5
+                    synList = []
+                    for syn in wordnet.synsets(word):
+                        for l in syn.lemmas():
+                            synList.append(l.name())
+                    score = 0
+                    for i in range(0,9):
+                        try:
+                            score = sentimentDict[synList[i]]
+                        except KeyError:
+                            continue
+                    if score == 0:
+                        score = 4.5
 
             cumulativeScore += score
 
