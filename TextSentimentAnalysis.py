@@ -4,6 +4,7 @@ import seaborn as sns
 from sklearn.feature_extraction import text
 import string
 from nltk.corpus import wordnet
+from gensim.models import Word2Vec
 
 stop_words = text.ENGLISH_STOP_WORDS
 
@@ -63,6 +64,18 @@ def wordNetSmooth(word):
     if score == 0:
         score = 4.5
     return score
+
+#def word2vecModelBuild(sentences):
+#    model = Word2Vec(sentences)
+#    return model
+#
+#def word2vecSmooth(model, word):
+#    closeWord = model.most_similar(word)[0][0]
+#    print(closeWord)
+#    score = sentimentDict[closeWord]
+#    return score
+    
+    
     
 def computeSentenceAverages(inputText):
     cumulativeAverageScore, sentenceAverages = 0, []
@@ -98,12 +111,6 @@ def computeSentenceAverages(inputText):
     
     return [sentenceAverages, inputText]
 
-def bigramModel():
-    solomonTextData = solomonTexts['Body'].tolist()
-    bigramDict = {}
-
-    return bigramDict
-
 def plotScores(textdata):
     ax = plt.axes()
     ax.set_ylabel("Score")
@@ -112,7 +119,6 @@ def plotScores(textdata):
     plt.show()
 
 def main():
-    # bigramModel()
     annaliseAvgs, annaliseText_ = computeSentenceAverages(annaliseTexts)
     cleanInputData(annaliseTexts)
     combinedList = []
