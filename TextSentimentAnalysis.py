@@ -33,12 +33,15 @@ for i in range(len(sentimentWord)):
 #plt.show()
 
 def computeSentenceAverages(inputText):
-    cumulativeAverageScore, sentenceAverages = 0, []
+    cumulativeAverageScore, sentenceAverages, percentTotalSmooth = 0, [], 0
     for i in range(len(inputText)):
         wordlist = inputText[i].lower().split(" ")
         cumulativeScore = 0
         stopWordPunctScore = 0
+        neighbors = 0
+        totalWords = 0
         for word in wordlist:
+            totalWords = totalWords + 1
             word =  "".join(l for l in word if l not in string.punctuation)
             if word in stop_words or word in string.punctuation:
                 stopWordPunctScore = stopWordPunctScore + 1
@@ -52,28 +55,36 @@ def computeSentenceAverages(inputText):
                         for l in syn.lemmas():
                             synList.append(l.name())
                     score = 0
-                    for i in range(0,9):
+#                    print("Wordnet:", word, synList)
+                    for i in range(len(synList)):
                         try:
                             score = sentimentDict[synList[i]]
+                            break
                         except KeyError:
                             continue
+#                    print(score)
                     if score == 0:
+                        neighbors = neighbors + 1
                         score = 4.5
 
             cumulativeScore += score
-
+        
+        percentSmoothed = (neighbors / totalWords) * 100
+        percentTotalSmooth = percentTotalSmooth + percentSmoothed
         sentLenStopWord = len(wordlist) - stopWordPunctScore
         if sentLenStopWord == 0:
             sentenceAverageScore = 4.5
         else:
             sentenceAverageScore = cumulativeScore / sentLenStopWord
-        print("Score:", cumulativeScore)
-        print("Length:", len(wordlist))
-        print("StopWords:", stopWordPunctScore)
-        print("Final:", sentenceAverageScore)
+#        print("Score:", cumulativeScore)
+#        print("Length:", len(wordlist))
+#        print("StopWords:", stopWordPunctScore)
+#        print("Final:", sentenceAverageScore)
         cumulativeAverageScore += sentenceAverageScore
         sentenceAverages.append(sentenceAverageScore)
 
+    print("% Smoothed:", percentTotalSmooth / len(inputText))
+    
     return [sentenceAverages, inputText]
 
 def bigramModel():
@@ -93,12 +104,12 @@ def main():
     # bigramModel()
     annaliseAvgs, annaliseText_ = computeSentenceAverages(annaliseTexts)
     combinedList = []
+    percentSum = 0
     for i in range(len(annaliseAvgs)):
         combinedList.append([annaliseAvgs[i], annaliseText_[i]])
-
     combinedList.sort()
     
-    print(combinedList)
+#    print(combinedList)
 
 
 
