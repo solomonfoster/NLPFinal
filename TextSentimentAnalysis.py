@@ -32,15 +32,46 @@ for i in range(len(sentimentWord)):
 #plt.scatter(list(range(len(sentimentDict.values()))), sentimentDict.values(), color = 'blue', marker = 'x', s = 15, label = 'score')
 #plt.show()
 
-def computeSentenceAverages(inputText):
-    cumulativeAverageScore, sentenceAverages = 0, []
+def cleanInputData(inputText):
+    sentenceList = []
     for i in range(len(inputText)):
         wordlist = inputText[i].lower().split(" ")
-        cumulativeScore = 0
-        stopWordPunctScore = 0
+        cleanWordList = []
         for word in wordlist:
             #Remove any instance of punctuation in/around a word
             word =  "".join(l for l in word if l not in string.punctuation)
+            cleanWordList.append(word)
+        sentenceList.append(cleanWordList)
+    return sentenceList
+
+def wordNetSmooth(word):
+    synList = []
+    #If not in our corpus make WordNet Synonyms list
+    for syn in wordnet.synsets(word):
+        for l in syn.lemmas():
+            synList.append(l.name())
+    #set score to 0
+    score = 0
+    #Test to see if any synonym words exist in our corpus
+    for i in range(len(synList)):
+        try:
+            score = sentimentDict[synList[i]]
+            break
+        except KeyError:
+            continue
+    #Otherwise give word neutral score
+    if score == 0:
+        score = 4.5
+    return score
+    
+def computeSentenceAverages(inputText):
+    cumulativeAverageScore, sentenceAverages = 0, []
+    sentenceList = cleanInputData(inputText)
+    for sent in range(len(sentenceList)):
+        cumulativeScore = 0
+        stopWordPunctScore = 0
+        wordlist = sentenceList[sent]
+        for word in wordlist:
             #If stop word or punctuation, skip
             if word in stop_words or word in string.punctuation:
                 stopWordPunctScore = stopWordPunctScore + 1
@@ -50,26 +81,10 @@ def computeSentenceAverages(inputText):
                 try:
                     score = sentimentDict[word]
                 except KeyError:
-                    #If not in our corpus make WordNet Synonyms list
-                    synList = []
-                    for syn in wordnet.synsets(word):
-                        for l in syn.lemmas():
-                            synList.append(l.name())
-                    #set score to 0
-                    score = 0
-#                    print("Wordnet:", word, synList)
-                    #Test to see if any synonym words exist in our corpus
-                    for i in range(len(synList)):
-                        try:
-                            score = sentimentDict[synList[i]]
-                            break
-                        except KeyError:
-                            continue
-                    #Otherwise give word neutral score
-                    if score == 0:
-                        score = 4.5
+                    score = wordNetSmooth(word)
 
             cumulativeScore += score
+            
         #Do not count stop words or punctuation toward average
         sentLenStopWord = len(wordlist) - stopWordPunctScore
         
@@ -77,6 +92,7 @@ def computeSentenceAverages(inputText):
             sentenceAverageScore = 4.5
         else:
             sentenceAverageScore = cumulativeScore / sentLenStopWord
+            
         cumulativeAverageScore += sentenceAverageScore
         sentenceAverages.append(sentenceAverageScore)
     
@@ -98,6 +114,7 @@ def plotScores(textdata):
 def main():
     # bigramModel()
     annaliseAvgs, annaliseText_ = computeSentenceAverages(annaliseTexts)
+    cleanInputData(annaliseTexts)
     combinedList = []
     percentSum = 0
     for i in range(len(annaliseAvgs)):
