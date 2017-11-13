@@ -33,57 +33,52 @@ for i in range(len(sentimentWord)):
 #plt.show()
 
 def computeSentenceAverages(inputText):
-    cumulativeAverageScore, sentenceAverages, percentTotalSmooth = 0, [], 0
+    cumulativeAverageScore, sentenceAverages = 0, []
     for i in range(len(inputText)):
         wordlist = inputText[i].lower().split(" ")
         cumulativeScore = 0
         stopWordPunctScore = 0
-        neighbors = 0
-        totalWords = 0
         for word in wordlist:
-            totalWords = totalWords + 1
+            #Remove any instance of punctuation in/around a word
             word =  "".join(l for l in word if l not in string.punctuation)
+            #If stop word or punctuation, skip
             if word in stop_words or word in string.punctuation:
                 stopWordPunctScore = stopWordPunctScore + 1
                 continue
             else:
+                #Test to see if word is in our corpus
                 try:
                     score = sentimentDict[word]
                 except KeyError:
+                    #If not in our corpus make WordNet Synonyms list
                     synList = []
                     for syn in wordnet.synsets(word):
                         for l in syn.lemmas():
                             synList.append(l.name())
+                    #set score to 0
                     score = 0
 #                    print("Wordnet:", word, synList)
+                    #Test to see if any synonym words exist in our corpus
                     for i in range(len(synList)):
                         try:
                             score = sentimentDict[synList[i]]
                             break
                         except KeyError:
                             continue
-#                    print(score)
+                    #Otherwise give word neutral score
                     if score == 0:
-                        neighbors = neighbors + 1
                         score = 4.5
 
             cumulativeScore += score
-        
-        percentSmoothed = (neighbors / totalWords) * 100
-        percentTotalSmooth = percentTotalSmooth + percentSmoothed
+        #Do not count stop words or punctuation toward average
         sentLenStopWord = len(wordlist) - stopWordPunctScore
+        
         if sentLenStopWord == 0:
             sentenceAverageScore = 4.5
         else:
             sentenceAverageScore = cumulativeScore / sentLenStopWord
-#        print("Score:", cumulativeScore)
-#        print("Length:", len(wordlist))
-#        print("StopWords:", stopWordPunctScore)
-#        print("Final:", sentenceAverageScore)
         cumulativeAverageScore += sentenceAverageScore
         sentenceAverages.append(sentenceAverageScore)
-
-    print("% Smoothed:", percentTotalSmooth / len(inputText))
     
     return [sentenceAverages, inputText]
 
@@ -109,7 +104,7 @@ def main():
         combinedList.append([annaliseAvgs[i], annaliseText_[i]])
     combinedList.sort()
     
-#    print(combinedList)
+    print(combinedList)
 
 
 
