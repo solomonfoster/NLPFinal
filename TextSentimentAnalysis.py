@@ -67,8 +67,12 @@ def handleMisspellings(word):
             closestWord, closestWordIndex = referenceWord, i
             distance = editDistance
 
-    print(closestWord)
-    # return score
+    if distance < 4:
+        score = sentimentScore[closestWordIndex]
+    else:
+        score  = '<unk>'
+
+    return score
 
 #Helper function for computeSentenceAverages: tries to find synonyms for words not in tagset
 def wordNetSmooth(word):
@@ -88,7 +92,8 @@ def wordNetSmooth(word):
             continue
     #Otherwise give word an unknown tag
     if score == 0:
-        score = "<unk>"
+        score = handleMisspellings(word)
+        # score = "<unk>"
     return score
 
 def computeSentenceAverages(inputText):
@@ -139,10 +144,7 @@ def runModel(text):
 
 
 def main():
-    sampleSentences = ["i'm too drunk and too high"]
-    # runModel(sampleSentences)
-    runModel(sampleSentences)
-    handleMisspellings("ahahahaha")
+    runModel(annaliseTexts)
 
 if __name__ == "__main__":
     main()
