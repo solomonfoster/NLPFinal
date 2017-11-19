@@ -144,7 +144,7 @@ def plotScores(scores):
 
 #Takes in positivity score and returns either a binary positive/negative classification
 #Or a leveled positivity rating based on the positivity dist. of Solomon's texts.
-def qualitativeOutput(score, binary_leveled):
+def qualitativeOutput(score, binary_leveled='leveled'):
     #Using corpus of Solomon's texts as training data to create a positivity distribution.
     #Then, compare inputted text against the training distribution
     sentimentDistribution = runModel(solomonSentTexts)
@@ -182,15 +182,14 @@ def main():
     testrun = runModel(lazarCoversation1)
     print(testrun[0])
 
-    #Plotting functionality
-    lazarCoversation1Scores = list(map(lambda x: x[0], testrun[0]))
-    plotScores(lazarCoversation1Scores)
-
     #Qualitative output
     sampleText = ["This is absolutely absurd I k it's not your fault but I'm never ordering from Domino's again. I've waited over three hours for my pizza and I'm so hungry and I'm crying"]
     qualitativeTest = runModel(sampleText)
     print(qualitativeOutput(qualitativeTest[0][0][0], binary_leveled = "leveled"))
 
+    #Plotting functionality
+    lazarCoversation1Scores = list(map(lambda x: x[0], testrun[0]))
+    plotScores(lazarCoversation1Scores)
 
 if __name__ == "__main__":
     main()
